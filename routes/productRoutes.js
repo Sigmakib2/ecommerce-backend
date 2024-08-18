@@ -1,13 +1,26 @@
+// express-backend/routes/productRoutes.js
 const express = require('express');
-const { getProducts, getProductById, createProduct, updateProduct, deleteProduct } = require('../controllers/productController');
-const { protect, admin } = require('../middleware/authMiddleware');
-
 const router = express.Router();
+const { protect } = require('../middleware/authMiddleware');
+const Product = require('../models/productModel');
 
-router.get('/', getProducts);
-router.get('/:id', getProductById);
-router.post('/', protect, admin, createProduct);
-router.put('/:id', protect, admin, updateProduct);
-router.delete('/:id', protect, admin, deleteProduct);
+// POST /api/products - Add a new product
+router.post('/', protect, async (req, res) => {
+    const { name, description, price, imageUrl } = req.body;
+
+    try {
+        const product = new Product({
+            name,
+            description,
+            price,
+            imageUrl,
+        });
+
+        const createdProduct = await product.save();
+        res.status(201).json(createdProduct);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to add product' });
+    }
+});
 
 module.exports = router;
